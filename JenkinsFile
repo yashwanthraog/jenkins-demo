@@ -1,0 +1,49 @@
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Getting source code'
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building the application'
+                sh 'ls -la'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running basic checks'
+                sh 'test -f index.html'
+                sh 'grep -q "Hello from Jenkins CI/CD" index.html'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                echo 'Packaging the application'
+                sh 'tar -czf website.tar.gz index.html'
+                archiveArtifacts artifacts: 'website.tar.gz',
+                                 fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully'
+        }
+        failure {
+            echo 'Pipeline failed. Check Console Output.'
+        }
+        always {
+            echo 'Pipeline execution finished'
+        }
+    }
+}
